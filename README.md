@@ -65,12 +65,12 @@ For Windows 7, 8, 10, and 11 (64-bit)
 
 Standard Windows installer with desktop shortcut and uninstaller support:
 
-Download [symphytum-2.7.2-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.7.2/symphytum-2.7.2-setup.exe)
+Download [symphytum-2.8-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/symphytum-2.8-setup.exe)
 
 #### 1. Linux Portable Archive (.tar.gz)
 Self-contained pre-compiled binaries and desktop integration resources:
 
-Download [Symphytum-2.7.2-Linux-x86_64.tar.gz](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.7.2/Symphytum-2.7.2-Linux-x86_64.tar.gz)
+Download [Symphytum-2.8-Linux-x86_64.tar.gz](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/Symphytum-2.8-Linux-x86_64.tar.gz)
 
 ---
 
