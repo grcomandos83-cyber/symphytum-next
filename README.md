@@ -67,26 +67,6 @@ Standard Windows installer with desktop shortcut and uninstaller support:
 
 Download [symphytum-2.7.2-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.7.2/symphytum-2.7.2-setup.exe)
 
----
-
-### macOS
-For macOS 11 Big Sur, 12 Monterey, 13 Ventura, 14 Sonoma, 15 Sequoia (Intel & Apple Silicon via Rosetta 2)
-
-#### 1. macOS Disk Image (.dmg)
-Standard macOS drag-and-drop installer disk image:
-
-Download [Symphytum-2.7.2-macOS.dmg](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.7.2/Symphytum-2.7.2-macOS.dmg)
-
-#### 2. macOS Portable ZIP Bundle
-Standalone application bundle archive (`Symphytum.app`):
-
-Download [Symphytum-2.7.2-macOS.zip](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.7.2/Symphytum-2.7.2-macOS.zip)
-
----
-
-### Linux
-For modern 64-bit Linux distributions (Ubuntu, Debian, Fedora, Arch, etc.)
-
 #### 1. Linux Portable Archive (.tar.gz)
 Self-contained pre-compiled binaries and desktop integration resources:
 

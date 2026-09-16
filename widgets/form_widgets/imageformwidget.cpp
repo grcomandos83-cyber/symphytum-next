@@ -424,8 +424,7 @@ void ImageFormWidget::browseButtonClicked()
     QString file = QFileDialog::getOpenFileName(this,
                                                 tr("Import Image"),
                                                 QDir::homePath(),
-                                                tr("Images (*.png *.jpeg "
-                                                   "*.jpg *.tiff *.gif *.bmp *.svg)")
+                                                tr("Images (*.png *.PNG *.jpeg *.JPEG *.jpg *.JPG *.tiff *.TIFF *.gif *.GIF *.bmp *.BMP *.svg *.SVG)")
                                                 );
 
     if (file.isEmpty())

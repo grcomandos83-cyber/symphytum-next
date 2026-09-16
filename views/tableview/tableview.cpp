@@ -15,6 +15,9 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QAction>
 #include <QtGui/QContextMenuEvent>
+#include <QtGui/QClipboard>
+#include <QtWidgets/QApplication>
+#include <QtGui/QKeyEvent>
 
 
 //-----------------------------------------------------------------------------
@@ -175,6 +178,7 @@ void TableView::contextMenuEvent(QContextMenuEvent *event)
     QMenu menu(this);
     menu.addAction(m_newRecordContextAction);
     if (selectionModel()->hasSelection()) {
+        menu.addAction(m_copyContextAction);
         menu.addAction(m_duplicateRecordContextAction);
         menu.addAction(m_deleteRecordContextAction);
     }
@@ -186,6 +190,16 @@ void TableView::contextMenuEvent(QContextMenuEvent *event)
         menu.addAction(m_deleteFieldContextAction);
     }
     menu.exec(event->globalPos());
+}
+
+void TableView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Copy)) {
+        copyToClipboard();
+        event->accept();
+    } else {
+        QTableView::keyPressEvent(event);
+    }
 }
 
 
@@ -295,6 +309,7 @@ void TableView::createContextActions()
     m_newRecordContextAction = new QAction(tr("New record"), this);
     m_duplicateRecordContextAction = new QAction(tr("Duplicate record"), this);
     m_deleteRecordContextAction = new QAction(tr("Delete record"), this);
+    m_copyContextAction = new QAction(tr("Copy to clipboard"), this);
 
     //connections
     connect(m_newFieldContextAction, SIGNAL(triggered()),
@@ -311,7 +326,39 @@ void TableView::createContextActions()
             this, SIGNAL(duplicateRecordSignal()));
     connect(m_deleteRecordContextAction, SIGNAL(triggered()),
             this, SIGNAL(deleteRecordSignal()));
+    connect(m_copyContextAction, SIGNAL(triggered()),
+            this, SLOT(copyToClipboard()));
 }
+
+void TableView::copyToClipboard()
+{
+    QModelIndexList indexes = selectionModel()->selectedIndexes();
+    if (indexes.isEmpty())
+        return;
+
+    std::sort(indexes.begin(), indexes.end());
+
+    QString clipboardText;
+    int previousRow = indexes.first().row();
+
+    for (const QModelIndex &index : indexes) {
+        if (index.row() != previousRow) {
+            clipboardText.append('\n');
+            previousRow = index.row();
+        } else if (index != indexes.first()) {
+            clipboardText.append('\t');
+        }
+        
+        QString text = model()->data(index, Qt::DisplayRole).toString();
+        // Escape newlines and tabs if necessary, or just append
+        text.replace('\n', ' ');
+        text.replace('\t', ' ');
+        clipboardText.append(text);
+    }
+
+    QApplication::clipboard()->setText(clipboardText);
+}
+
 
 void TableView::restoreSectionOrder()
 {

@@ -24,7 +24,6 @@
 class TableViewDelegate;
 class QAction;
 
-
 //-----------------------------------------------------------------------------
 // TableView
 //-----------------------------------------------------------------------------
@@ -87,6 +86,7 @@ protected slots:
 protected:
     bool edit(const QModelIndex &index, EditTrigger trigger, QEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void initView();
@@ -95,6 +95,9 @@ private slots:
 
     /** Manually editing (ie. editor closed and data committed) complete */
     void editingFinished();
+
+    /** Copy selection to clipboard */
+    void copyToClipboard();
 
 private:
     /** Call fetchMore() on model until all data is loaded */
@@ -115,6 +118,7 @@ private:
     QAction *m_newRecordContextAction;
     QAction *m_duplicateRecordContextAction;
     QAction *m_deleteRecordContextAction;
+    QAction *m_copyContextAction;
 
     TableViewDelegate *m_delegate;
     int m_lastUsedRow; /**< Keep track of last focused row */

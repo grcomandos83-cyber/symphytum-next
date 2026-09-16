@@ -1,5 +1,12 @@
 # Changelog
 
+Version 2.8
+===========
+
+### New Features & Fixes
+- **Export to Clipboard**: Added the ability to right-click in Table View and copy selected records (or use Ctrl+C) to quickly paste data into Excel or other applications.
+- **Image Extensions**: Fixed a bug where uppercase image file extensions (e.g., .JPG, .PNG) were not visible or selectable in the image import dialog.
+
 Version 2.7.2
 =============
 
