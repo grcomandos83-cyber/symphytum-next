@@ -202,14 +202,20 @@ jobs:
         with:
           ref: master
       
-      - name: Update README.md
+      - name: Update README.md and Update Check
         run: |
           ver="${GITHUB_REF_NAME#v}"
           sed -i -E "s/v[0-9]+\.[0-9]+(\.[0-9]+)?/v${ver}/g" README.md
           sed -i -E "s/symphytum-[0-9]+\.[0-9]+(\.[0-9]+)?/symphytum-${ver}/gi" README.md
           
+          # Extract SOFTWARE_BUILD and update raw_check
+          build_num=$(grep -oP 'SOFTWARE_BUILD\s*=\s*\K[0-9]+' utils/definitionholder.cpp)
+          if [ -n "$build_num" ]; then
+            echo "${build_num};" > doc/update/raw_check/latest
+          fi
+          
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git diff-index --quiet HEAD || git commit -m "docs: auto-update README download links to v${ver} [skip ci]"
+          git add README.md doc/update/raw_check/latest
+          git diff-index --quiet HEAD || git commit -m "docs: auto-update README and update-check to v${ver} [skip ci]"
           git push origin master
