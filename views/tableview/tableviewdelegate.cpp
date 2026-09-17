@@ -8,6 +8,7 @@
 //-----------------------------------------------------------------------------
 
 #include "tableviewdelegate.h"
+#include <cmath>
 #include "editors/imagetypeeditor.h"
 #include "editors/filestypeeditor.h"
 #include "../../utils/formwidgetvalidator.h"

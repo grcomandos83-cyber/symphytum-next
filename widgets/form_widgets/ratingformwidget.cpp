@@ -1,4 +1,6 @@
 #include "ratingformwidget.h"
+#include <QHBoxLayout>
+#include <cmath>
 #include "../../utils/formwidgetvalidator.h"
 #include "../../components/metadataengine.h"
 
