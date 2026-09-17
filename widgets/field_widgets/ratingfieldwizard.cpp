@@ -6,9 +6,8 @@
 // Hearders
 //-----------------------------------------------------------------------------
 
-#include "RatingFieldWizard.h"
-#include "ui_RatingFieldWizard.h"
-
+#include "ratingfieldwizard.h"
+#include "ui_ratingfieldwizard.h"
 #include "../../components/metadataengine.h"
 #include "../../utils/metadatapropertiesparser.h"
 
