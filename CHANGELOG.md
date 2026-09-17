@@ -4,8 +4,12 @@ Version 2.8
 ===========
 
 ### New Features & Fixes
+- **Star Rating Field**: Added a new Rating Field type (0 to 5 stars) using vector graphics that integrates natively into the Form View and Table View. Includes full support for sorting, filtering, CSV export, and HTML/PDF printing.
 - **Export to Clipboard**: Added the ability to right-click in Table View and copy selected records (or use Ctrl+C) to quickly paste data into Excel or other applications.
 - **Image Extensions**: Fixed a bug where uppercase image file extensions (e.g., .JPG, .PNG) were not visible or selectable in the image import dialog.
+
+### Under the Hood
+- **UI Cleanup**: Temporarily removed all "Donate" links, popup suggestions, and related menu items in preparation for a new donation system.
 
 Version 2.7.2
 =============
