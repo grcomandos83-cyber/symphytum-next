@@ -136,9 +136,33 @@ void StarEditor::paintEvent(QPaintEvent *)
     }
 }
 
-void StarEditor::mouseReleaseEvent(QMouseEvent *event)
+void StarEditor::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
+        int stars = starAtPosition(event->x());
+        if (stars != -1) {
+            if (stars == m_starCount) {
+                m_starCount = 0; // Click again to clear
+            } else {
+                m_starCount = stars;
+            }
+            update();
+            emit editingFinished();
+        }
+        event->accept();
+    } else {
+        QWidget::mousePressEvent(event);
+    }
+}
+
+void StarEditor::mouseReleaseEvent(QMouseEvent *event)
+{
+    QWidget::mouseReleaseEvent(event);
+}
+
+void StarEditor::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton) {
         int stars = starAtPosition(event->x());
         if (stars != m_starCount && stars != -1) {
             m_starCount = stars;
@@ -146,11 +170,6 @@ void StarEditor::mouseReleaseEvent(QMouseEvent *event)
             emit editingFinished();
         }
     }
-    QWidget::mouseReleaseEvent(event);
-}
-
-void StarEditor::mouseMoveEvent(QMouseEvent *event)
-{
     QWidget::mouseMoveEvent(event);
 }
 
