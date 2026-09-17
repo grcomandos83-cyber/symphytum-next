@@ -9,6 +9,7 @@
 
 #include "tableviewdelegate.h"
 #include <cmath>
+#include <QMouseEvent>
 #include "editors/imagetypeeditor.h"
 #include "editors/filestypeeditor.h"
 #include "../../utils/formwidgetvalidator.h"
@@ -113,6 +114,36 @@ QSize TableViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     } else {
         return QStyledItemDelegate::sizeHint(option, index);
     }
+}
+
+bool TableViewDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
+{
+    if (event->type() == QEvent::MouseButtonRelease) {
+        int column = index.column();
+        if (m_metadataEngine->getFieldType(column) == MetadataEngine::RatingType) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            
+            const int scaleFactor = 16;
+            int maxStars = 5;
+            int totalWidth = maxStars * scaleFactor;
+            int startX = option.rect.x() + (option.rect.width() - totalWidth) / 2;
+            int startY = option.rect.y() + (option.rect.height() - scaleFactor) / 2;
+            
+            if (mouseEvent->pos().x() >= startX && mouseEvent->pos().x() <= startX + totalWidth &&
+                mouseEvent->pos().y() >= startY && mouseEvent->pos().y() <= startY + scaleFactor) {
+                
+                int star = ((mouseEvent->pos().x() - startX) / scaleFactor) + 1;
+                int currentRating = index.data().toInt();
+                if (star == currentRating) {
+                    star = 0; // Clear rating
+                }
+                
+                model->setData(index, star, Qt::EditRole);
+                return true;
+            }
+        }
+    }
+    return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
 QWidget* TableViewDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -269,7 +300,8 @@ QWidget* TableViewDelegate::createEditor(QWidget *parent, const QStyleOptionView
         break;
     case MetadataEngine::CreationDateType:
     case MetadataEngine::ModDateType:
-        //editing not supported
+    case MetadataEngine::RatingType:
+        //editing not supported via widget
         e = nullptr;
         break;
     default:
