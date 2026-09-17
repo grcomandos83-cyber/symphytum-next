@@ -242,9 +242,6 @@ void PrintDialog::print(bool pdf, QString pdfOutputPath)
             case MetadataEngine::ProgressType:
                 htmlString.append(progressTypeItemHtml(query.value(i), i));
                 break;
-            case MetadataEngine::RatingType:
-                htmlString.append(ratingTypeItemHtml(query.value(i), i));
-                break;
             case MetadataEngine::ImageType:
                 htmlString.append(imageTypeItemHtml(query.value(i), i));
                 break;
@@ -444,24 +441,6 @@ QString PrintDialog::progressTypeItemHtml(const QVariant &data, int fieldId)
     int percentage = (((double) value) / max) * 100.0;
     html.append(QString::number(percentage) + "%");
 
-    return html;
-}
-
-QString PrintDialog::ratingTypeItemHtml(const QVariant &data, int fieldId)
-{
-    Q_UNUSED(fieldId);
-    int value = data.toInt();
-    if (value < 0) value = 0;
-    if (value > 5) value = 5;
-    
-    QString html;
-    for (int i = 0; i < 5; ++i) {
-        if (i < value) {
-            html.append("★");
-        } else {
-            html.append("☆");
-        }
-    }
     return html;
 }
 

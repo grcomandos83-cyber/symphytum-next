@@ -8,8 +8,6 @@
 //-----------------------------------------------------------------------------
 
 #include "tableviewdelegate.h"
-#include <cmath>
-#include <QMouseEvent>
 #include "editors/imagetypeeditor.h"
 #include "editors/filestypeeditor.h"
 #include "../../utils/formwidgetvalidator.h"
@@ -97,9 +95,6 @@ void TableViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     case MetadataEngine::FilesType:
         paintFilesType(painter, option, index);
         break;
-    case MetadataEngine::RatingType:
-        paintRatingType(painter, option, index);
-        break;
     default:
         QStyledItemDelegate::paint(painter, option, index);
         break;
@@ -114,36 +109,6 @@ QSize TableViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     } else {
         return QStyledItemDelegate::sizeHint(option, index);
     }
-}
-
-bool TableViewDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
-{
-    if (event->type() == QEvent::MouseButtonRelease) {
-        int column = index.column();
-        if (m_metadataEngine->getFieldType(column) == MetadataEngine::RatingType) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            
-            const int scaleFactor = 16;
-            int maxStars = 5;
-            int totalWidth = maxStars * scaleFactor;
-            int startX = option.rect.x() + (option.rect.width() - totalWidth) / 2;
-            int startY = option.rect.y() + (option.rect.height() - scaleFactor) / 2;
-            
-            if (mouseEvent->pos().x() >= startX && mouseEvent->pos().x() <= startX + totalWidth &&
-                mouseEvent->pos().y() >= startY && mouseEvent->pos().y() <= startY + scaleFactor) {
-                
-                int star = ((mouseEvent->pos().x() - startX) / scaleFactor) + 1;
-                int currentRating = index.data().toInt();
-                if (star == currentRating) {
-                    star = 0; // Clear rating
-                }
-                
-                model->setData(index, star, Qt::EditRole);
-                return true;
-            }
-        }
-    }
-    return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
 QWidget* TableViewDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -291,8 +256,7 @@ QWidget* TableViewDelegate::createEditor(QWidget *parent, const QStyleOptionView
         break;
     case MetadataEngine::CreationDateType:
     case MetadataEngine::ModDateType:
-    case MetadataEngine::RatingType:
-        //editing not supported via widget
+        //editing not supported
         e = nullptr;
         break;
     default:
@@ -328,9 +292,6 @@ void TableViewDelegate::setEditorData(QWidget *editor, const QModelIndex &index)
     case MetadataEngine::ProgressType:
         setProgressTypeEditorData(editor, index);
         break;
-    case MetadataEngine::RatingType:
-        setRatingTypeEditorData(editor, index);
-        break;
     case MetadataEngine::ImageType:
         setImageTypeEditorData(editor, index);
         break;
@@ -365,7 +326,6 @@ void TableViewDelegate::updateEditorGeometry(QWidget *editor,
     case MetadataEngine::ModDateType:
     case MetadataEngine::ComboboxType:
     case MetadataEngine::ProgressType:
-    case MetadataEngine::RatingType:
     case MetadataEngine::ImageType:
     case MetadataEngine::FilesType:
     case MetadataEngine::URLTextType:
@@ -475,7 +435,6 @@ void TableViewDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     }
         break;
     case MetadataEngine::ProgressType:
-    case MetadataEngine::RatingType:
     {
         QSpinBox *c;
         c = qobject_cast<QSpinBox*>(editor);
@@ -846,52 +805,6 @@ void TableViewDelegate::paintProgressType(QPainter *painter,
     QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter);
 }
 
-void TableViewDelegate::paintRatingType(QPainter *painter,
-                                        const QStyleOptionViewItem &option,
-                                        const QModelIndex &index) const
-{
-    int value = index.data().toInt();
-    if (value < 0) value = 0;
-    if (value > 5) value = 5;
-    
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing, true);
-    
-    // Create the star polygon
-    QPolygonF starPolygon;
-    starPolygon << QPointF(1.0, 0.5);
-    for (int i = 1; i < 5; ++i)
-        starPolygon << QPointF(0.5 + 0.5 * std::cos(0.8 * i * 3.14159265),
-                               0.5 + 0.5 * std::sin(0.8 * i * 3.14159265));
-                               
-    const int scaleFactor = 16; // Star size
-    int maxStars = 5;
-    
-    // Center stars horizontally and vertically
-    int totalWidth = maxStars * scaleFactor;
-    int startX = option.rect.x() + (option.rect.width() - totalWidth) / 2;
-    int startY = option.rect.y() + (option.rect.height() - scaleFactor) / 2;
-    
-    painter->translate(startX, startY);
-    
-    for (int i = 0; i < maxStars; ++i) {
-        painter->save();
-        painter->translate(i * scaleFactor, 0);
-        painter->scale(scaleFactor, scaleFactor);
-        
-        if (i < value) {
-            painter->setBrush(option.palette.text());
-        } else {
-            painter->setBrush(option.palette.windowText().color().lighter(300));
-        }
-        painter->setPen(Qt::NoPen);
-        painter->drawPolygon(starPolygon, Qt::WindingFill);
-        painter->restore();
-    }
-    
-    painter->restore();
-}
-
 void TableViewDelegate::paintImageType(QPainter *painter,
                                        const QStyleOptionViewItem &option,
                                        const QModelIndex &index) const
@@ -1079,15 +992,6 @@ void TableViewDelegate::setComboboxTypeEditorData(QWidget *editor,
 
 void TableViewDelegate::setProgressTypeEditorData(QWidget *editor,
                                                   const QModelIndex &index) const
-{
-    QSpinBox *spinBox;
-
-    spinBox = qobject_cast<QSpinBox*>(editor);
-    if (spinBox) spinBox->setValue(index.data().toInt());
-}
-
-void TableViewDelegate::setRatingTypeEditorData(QWidget *editor,
-                                                const QModelIndex &index) const
 {
     QSpinBox *spinBox;
 

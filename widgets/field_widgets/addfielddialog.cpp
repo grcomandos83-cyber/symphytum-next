@@ -21,7 +21,6 @@
 #include "urlfieldwizard.h"
 #include "emailfieldwizard.h"
 #include "currencyfieldwizard.h"
-#include "ratingfieldwizard.h"
 
 
 //-----------------------------------------------------------------------------
@@ -150,10 +149,6 @@ void AddFieldDialog::nextButtonClicked()
             m_currentWizard = new CurrencyFieldWizard(fieldName, this, m_currentMode);
             m_fieldType = MetadataEngine::CurrencyType;
             break;
-        case 13:
-            m_currentWizard = new RatingFieldWizard(fieldName, this, m_currentMode);
-            m_fieldType = MetadataEngine::RatingType;
-            break;
         default:
             return;
         }
@@ -253,12 +248,7 @@ void AddFieldDialog::updateFieldDescription()
         ui->descriptionLabel->setText(tr("Currency values. "
                                          "Input field for monetary amounts with "
                                          "customizable currency symbol (€, $, £, etc.), "
-                                         "and decimal precision."
-                                         ));
-        break;
-    case 13:
-        ui->descriptionLabel->setText(tr("Star rating. "
-                                         "Allows you to assign a rating from 0 to 5 stars."
+                                         "decimal precision, and financial formatting."
                                          ));
         break;
     default:
@@ -333,7 +323,6 @@ void AddFieldDialog::init()
     ui->fieldTypeListWidget->addItem(tr("Web Link"));
     ui->fieldTypeListWidget->addItem(tr("Email Address"));
     ui->fieldTypeListWidget->addItem(tr("Currency"));
-    ui->fieldTypeListWidget->addItem(tr("Rating"));
 }
 
 void AddFieldDialog::createConnections()
