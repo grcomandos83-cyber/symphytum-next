@@ -235,15 +235,6 @@ QWidget* TableViewDelegate::createEditor(QWidget *parent, const QStyleOptionView
         e = c;
     }
         break;
-    case MetadataEngine::RatingType:
-    {
-        QSpinBox *c = new QSpinBox(parent);
-        c->setButtonSymbols(QAbstractSpinBox::PlusMinus);
-        c->setRange(0, 5);
-        c->setSuffix(tr(" Stars"));
-        e = c;
-    }
-        break;
     case MetadataEngine::ImageType:
     {
         ImageTypeEditor *i = new ImageTypeEditor(parent);
