@@ -108,6 +108,10 @@ set(SOURCES
     widgets/form_widgets/emailformwidget.cpp
     widgets/field_widgets/currencyfieldwizard.cpp
     widgets/form_widgets/currencyformwidget.cpp
+    widgets/field_widgets/ratingfieldwizard.cpp
+    widgets/field_widgets/ratingfieldwizard.h
+    widgets/form_widgets/ratingformwidget.cpp
+    widgets/form_widgets/ratingformwidget.h
     components/sync_framework/megasyncdriver.cpp
     widgets/upgradesuccessdialog.cpp
 )

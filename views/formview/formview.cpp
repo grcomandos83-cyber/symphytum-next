@@ -27,6 +27,7 @@
 #include "../../widgets/form_widgets/urlformwidget.h"
 #include "../../widgets/form_widgets/emailformwidget.h"
 #include "../../widgets/form_widgets/currencyformwidget.h"
+#include "../../widgets/form_widgets/ratingformwidget.h"
 #include "../../widgets/mainwindow.h"
 #include "../../models/standardmodel.h"
 #include "emptyformwidget.h"
@@ -1545,6 +1546,9 @@ AbstractFormWidget* FormView::createFormWidget(MetadataEngine::FieldType type,
         break;
     case MetadataEngine::ProgressType:
         f = new ProgressFormWidget(viewport());
+        break;
+    case MetadataEngine::RatingType:
+        f = new RatingFormWidget(viewport());
         break;
     case MetadataEngine::ImageType:
         f = new ImageFormWidget(viewport());

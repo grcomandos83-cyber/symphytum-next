@@ -58,7 +58,8 @@ public:
         FilesType,          /**< File list type */
         URLTextType,        /**< URL text type */
         EmailTextType,      /**< Email text type */
-        CurrencyType        /**< Currency / monetary type */
+        CurrencyType,       /**< Currency/Monetary type */
+        RatingType          /**< Rating/Star type */
     };
 
     /**

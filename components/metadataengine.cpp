@@ -1317,6 +1317,7 @@ QString MetadataEngine::dataTypeSqlName(FieldType type)
     case ImageType:
     case ComboboxType:
     case ProgressType:
+    case RatingType:
         s = "INTEGER";
         break;
     case CurrencyType:

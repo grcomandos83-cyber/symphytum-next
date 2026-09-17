@@ -1143,6 +1143,7 @@ void MainWindow::searchSlot(const QString &s)
             switch(m_metadataEngine->getFieldType(i)) {
             case MetadataEngine::CheckboxType:
             case MetadataEngine::ProgressType:
+            case MetadataEngine::RatingType:
             case MetadataEngine::ImageType:
             case MetadataEngine::FilesType:
                 //exclude non-text/binary field types from search results

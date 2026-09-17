@@ -73,6 +73,8 @@ private:
                         const QModelIndex &index) const;
     void paintCurrencyType(QPainter *painter, const QStyleOptionViewItem &option,
                            const QModelIndex &index) const;
+    void paintRatingType(QPainter *painter, const QStyleOptionViewItem &option,
+                         const QModelIndex &index) const;
 
     //custom set editor data methods
     void setTextTypeEditorData(QWidget *editor, const QModelIndex &index) const;
@@ -81,6 +83,7 @@ private:
     void setCheckboxTypeEditorData(QWidget *editor, const QModelIndex &index) const;
     void setComboboxTypeEditorData(QWidget *editor, const QModelIndex &index) const;
     void setProgressTypeEditorData(QWidget *editor, const QModelIndex &index) const;
+    void setRatingTypeEditorData(QWidget *editor, const QModelIndex &index) const;
     void setImageTypeEditorData(QWidget *editor, const QModelIndex &index) const;
     void setFilesTypeEditorData(QWidget *editor, const QModelIndex &index) const;
     void setDateTypeEditorData(QWidget *editor, const QModelIndex &index) const;

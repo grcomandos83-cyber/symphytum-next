@@ -61,6 +61,7 @@ private:
     QString checkboxTypeItemHtml(const QVariant &data, int fieldId);
     QString comboboxTypeItemHtml(const QVariant &data, int fieldId);
     QString progressTypeItemHtml(const QVariant &data, int fieldId);
+    QString ratingTypeItemHtml(const QVariant &data, int fieldId);
     QString imageTypeItemHtml(const QVariant &data, int fieldId);
     QString filesTypeItemHtml(const QVariant &data, int fieldId);
 

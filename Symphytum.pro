@@ -108,6 +108,8 @@ SOURCES += main.cpp\
     widgets/form_widgets/emailformwidget.cpp \
     widgets/field_widgets/currencyfieldwizard.cpp \
     widgets/form_widgets/currencyformwidget.cpp \
+    widgets/field_widgets/ratingfieldwizard.cpp \
+    widgets/form_widgets/ratingformwidget.cpp \
     components/sync_framework/megasyncdriver.cpp \
     widgets/upgradesuccessdialog.cpp
 
@@ -194,6 +196,8 @@ HEADERS  += widgets/mainwindow.h \
     widgets/form_widgets/emailformwidget.h \
     widgets/field_widgets/currencyfieldwizard.h \
     widgets/form_widgets/currencyformwidget.h \
+    widgets/field_widgets/ratingfieldwizard.h \
+    widgets/form_widgets/ratingformwidget.h \
     components/sync_framework/megasyncdriver.h \
     widgets/upgradesuccessdialog.h
 
@@ -224,6 +228,8 @@ FORMS += \
     ui/aboutdialog.ui \
     ui/urlfieldwizard.ui \
     ui/emailfieldwizard.ui \
+    ui/currencyfieldwizard.ui \
+    ui/ratingfieldwizard.ui \
     widgets/upgradesuccessdialog.ui
 
 TRANSLATIONS = stuff/translations/symphytum_de.ts \
