@@ -67,10 +67,21 @@ Standard Windows installer with desktop shortcut and uninstaller support:
 
 Download [symphytum-2.8-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/symphytum-2.8-setup.exe)
 
+### Linux
+For modern Linux distributions (Ubuntu, Fedora, Debian, etc)
+
 #### 1. Linux Portable Archive (.tar.gz)
 Self-contained pre-compiled binaries and desktop integration resources:
 
 Download [Symphytum-2.8-Linux-x86_64.tar.gz](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/Symphytum-2.8-Linux-x86_64.tar.gz)
+
+### macOS
+For macOS High Sierra (10.13) and later
+
+#### 1. macOS Disk Image (.dmg)
+Contains the .app bundle, drag and drop into the Applications folder:
+
+Download [Symphytum-2.8-macOS.dmg](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/Symphytum-2.8-macOS.dmg)
 
 ---
 
