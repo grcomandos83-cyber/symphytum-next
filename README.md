@@ -63,9 +63,17 @@ General releases, binary packages, and source archives can be found on the [rele
 ### Windows
 For Windows 7, 8, 10, and 11 (64-bit)
 
+#### 1. Installer (.exe)
 Standard Windows installer with desktop shortcut and uninstaller support:
 
 Download [symphytum-2.8-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/symphytum-2.8-setup.exe)
+
+#### 2. Terminal Installation (PowerShell)
+You can easily download and install the latest version silently via PowerShell with a single command:
+
+```powershell
+iex (irm "https://raw.githubusercontent.com/grcomandos83-cyber/symphytum-next/master/install.ps1")
+```
 
 ### Linux
 For modern Linux distributions (Ubuntu, Fedora, Debian, etc)
