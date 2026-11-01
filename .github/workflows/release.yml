@@ -48,96 +48,132 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $ver = $env:GITHUB_REF_NAME -replace '^v',''
-          New-Item -ItemType Directory -Path dist -Force
+          try {
+            $ver = $env:GITHUB_REF_NAME -replace '^v',''
+            $distDir = (New-Item -ItemType Directory -Path dist -Force).FullName
 
-          # Find and set 64-bit MinGW
-          $mingwDir = $null
-          $mingwItem = Get-ChildItem -Path "D:\a", "C:\hostedtoolcache", "C:\Qt", $env:RUNNER_TEMP -Filter "g++.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -like "*64*" } | Select-Object -First 1
-          if ($mingwItem) {
-              $mingwDir = $mingwItem.DirectoryName
-              Write-Host "Found 64-bit MinGW at: $mingwDir"
-              $env:PATH = "$mingwDir;$env:PATH"
-          } else {
-              throw "64-bit MinGW (g++.exe) was not found!"
+            # Find and set 64-bit MinGW
+            $mingwDir = $null
+            $mingwItem = Get-ChildItem -Path "D:\a", "C:\hostedtoolcache", "C:\Qt", $env:RUNNER_TEMP -Filter "g++.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -like "*64*" } | Select-Object -First 1
+            if ($mingwItem) {
+                $mingwDir = $mingwItem.DirectoryName
+                Write-Host "Found 64-bit MinGW at: $mingwDir"
+                $env:PATH = "$mingwDir;$env:PATH"
+            } else {
+                throw "64-bit MinGW (g++.exe) was not found!"
+            }
+
+            # Find Qt bin directory containing windeployqt.exe
+            $qtBin = $null
+            foreach ($cand in @($env:QT_ROOT_DIR, $env:QTDIR, $env:Qt5_Dir)) {
+                if ($cand -and (Test-Path "$cand\bin\windeployqt.exe")) {
+                    $qtBin = (Resolve-Path "$cand\bin").Path
+                    break
+                }
+            }
+            if (-not $qtBin) {
+                $windeployItem = Get-ChildItem -Path "D:\a", "C:\hostedtoolcache", "C:\Qt", $env:RUNNER_TEMP -Filter "windeployqt.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($windeployItem) {
+                    $qtBin = $windeployItem.DirectoryName
+                }
+            }
+            if (-not $qtBin) {
+                throw "windeployqt.exe was not found in any search path!"
+            }
+            Write-Host "Found Qt bin at: $qtBin"
+            $env:PATH = "$qtBin;$env:PATH"
+
+            # Update translations
+            lrelease Symphytum.pro
+            if (Test-Path "stuff\translations\symphytum_el.qm") {
+                Copy-Item "stuff\translations\symphytum_el.qm" "resources\languages\" -Force
+            }
+
+            # Configure and compile with CMake & MinGW 64-bit
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles" -DCMAKE_C_COMPILER="$mingwDir/gcc.exe" -DCMAKE_CXX_COMPILER="$mingwDir/g++.exe"
+            cmake --build build --config Release --parallel
+
+            # Locate built executable
+            $exe = Get-ChildItem -Path "build" -Filter "symphytum.exe" -Recurse | Select-Object -First 1
+            if (-not $exe) {
+                throw "symphytum.exe was not found in build directory!"
+            }
+
+            # Prepare staging folder for installer
+            $stageDir = (New-Item -ItemType Directory -Path "$distDir\staging" -Force).FullName
+            Copy-Item $exe.FullName -Destination "$stageDir\symphytum.exe" -Force
+
+            # Deploy Qt dependencies
+            Write-Host "Deploying Qt dependencies via windeployqt..."
+            $qmakeExe = "$qtBin\qmake.exe"
+            & "$qtBin\windeployqt.exe" --verbose 2 --release --no-translations --compiler-runtime --qmake "$qmakeExe" --dir "$stageDir" "$stageDir\symphytum.exe"
+            Write-Host "windeployqt exit code: $LASTEXITCODE"
+
+            # Copy MinGW runtime DLLs
+            Copy-Item "$mingwDir\libgcc_s_*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
+            Copy-Item "$mingwDir\libstdc++-*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
+            Copy-Item "$mingwDir\libwinpthread-*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
+
+            # Ensure essential Qt DLLs are in staging folder (fallback copy if windeployqt missed any)
+            $essentialQtDlls = @("Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll", "Qt5PrintSupport.dll", "Qt5Sql.dll", "Qt5Svg.dll", "Qt5WinExtras.dll")
+            foreach ($dll in $essentialQtDlls) {
+                if (-not (Test-Path "$stageDir\$dll")) {
+                    if (Test-Path "$qtBin\$dll") {
+                        Write-Host "Copying missing $dll from $qtBin to $stageDir"
+                        Copy-Item "$qtBin\$dll" -Destination $stageDir -Force
+                    }
+                }
+            }
+
+            # Ensure essential Qt plugin folders are in staging folder
+            $qtPluginsDir = "$qtBin\..\plugins"
+            if (Test-Path $qtPluginsDir) {
+                foreach ($pluginDir in @("platforms", "styles", "sqldrivers", "imageformats", "printsupport", "iconengines", "bearer")) {
+                    if (Test-Path "$qtPluginsDir\$pluginDir") {
+                        if (-not (Test-Path "$stageDir\$pluginDir")) {
+                            Write-Host "Copying plugin directory $pluginDir to $stageDir"
+                            Copy-Item "$qtPluginsDir\$pluginDir" -Destination "$stageDir\$pluginDir" -Recurse -Force
+                        }
+                    }
+                }
+            }
+
+            # Verify critical Qt DLLs exist in staging
+            $criticalDlls = @("Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll", "Qt5PrintSupport.dll")
+            foreach ($dll in $criticalDlls) {
+                if (-not (Test-Path "$stageDir\$dll")) {
+                    throw "Verification failed: $dll is missing in $stageDir!"
+                }
+            }
+            Write-Host "Deployment verification successful! Staging directory contains all critical Qt DLLs."
+            Get-ChildItem -Path $stageDir | Select-Object Name, Length | Format-Table | Out-String | Write-Host
+
+            # Build Inno Setup Installer
+            $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+            if (-not (Test-Path $iscc)) {
+                $isccItem = Get-ChildItem -Path "C:\Program Files", "C:\Program Files (x86)" -Filter "ISCC.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($isccItem) {
+                    $iscc = $isccItem.FullName
+                }
+            }
+            if (Test-Path $iscc) {
+                Write-Host "Running Inno Setup with ISCC: $iscc"
+                & $iscc "/DMyAppVersion=$ver" "/DOutputDir=$distDir" "/DSourceDir=$stageDir" "/DOutputBaseFilename=symphytum-$ver-setup" "stuff\installers\symphytum.iss"
+                if ($LASTEXITCODE -ne 0) {
+                    throw "ISCC failed with exit code $LASTEXITCODE"
+                }
+            } else {
+                throw "ISCC.exe not found anywhere!"
+            }
+
+            # Clean up staging directory
+            Remove-Item -Recurse -Force $stageDir
+          } catch {
+            Write-Host "::error::$_"
+            Write-Host "Exception details: $($_.Exception.ToString())"
+            Write-Host "ScriptStackTrace: $($_.ScriptStackTrace)"
+            throw $_
           }
-
-          # Find Qt bin directory containing windeployqt.exe
-          $qtBin = $null
-          foreach ($cand in @($env:QT_ROOT_DIR, $env:QTDIR, $env:Qt5_Dir)) {
-              if ($cand -and (Test-Path "$cand\bin\windeployqt.exe")) {
-                  $qtBin = "$cand\bin"
-                  break
-              }
-          }
-          if (-not $qtBin) {
-              $windeployItem = Get-ChildItem -Path "D:\a", "C:\hostedtoolcache", "C:\Qt", $env:RUNNER_TEMP -Filter "windeployqt.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-              if ($windeployItem) {
-                  $qtBin = $windeployItem.DirectoryName
-              }
-          }
-          if (-not $qtBin) {
-              throw "windeployqt.exe was not found in any search path!"
-          }
-          Write-Host "Found Qt bin at: $qtBin"
-          $env:PATH = "$qtBin;$env:PATH"
-
-          # Update translations
-          lrelease Symphytum.pro
-          if (Test-Path "stuff\translations\symphytum_el.qm") {
-              Copy-Item "stuff\translations\symphytum_el.qm" "resources\languages\" -Force
-          }
-
-          # Configure and compile with CMake & MinGW 64-bit
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles" -DCMAKE_C_COMPILER="$mingwDir/gcc.exe" -DCMAKE_CXX_COMPILER="$mingwDir/g++.exe"
-          cmake --build build --config Release --parallel
-
-          # Locate built executable
-          $exe = Get-ChildItem -Path "build" -Filter "symphytum.exe" -Recurse | Select-Object -First 1
-          if (-not $exe) {
-              throw "symphytum.exe was not found in build directory!"
-          }
-
-          # Prepare staging folder for installer
-          $stageDir = "dist\staging"
-          New-Item -ItemType Directory -Path $stageDir -Force
-          Copy-Item $exe.FullName -Destination "$stageDir\symphytum.exe" -Force
-
-          # Deploy Qt dependencies
-          Write-Host "Deploying Qt dependencies via windeployqt..."
-          & "$qtBin\windeployqt.exe" --verbose 2 --release --no-translations --compiler-runtime "$stageDir\symphytum.exe"
-          if ($LASTEXITCODE -ne 0) {
-              throw "windeployqt failed with exit code $LASTEXITCODE"
-          }
-
-          # Copy MinGW runtime DLLs if not already present
-          Copy-Item "$mingwDir\libgcc_s_*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "$mingwDir\libstdc++-*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "$mingwDir\libwinpthread-*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
-
-          # Verify critical Qt DLLs exist in staging
-          $criticalDlls = @("Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll", "Qt5PrintSupport.dll")
-          foreach ($dll in $criticalDlls) {
-              if (-not (Test-Path "$stageDir\$dll")) {
-                  throw "Verification failed: $dll was NOT copied to $stageDir!"
-              }
-          }
-          Write-Host "Deployment verification successful! Staging directory contains all critical Qt DLLs."
-          Get-ChildItem -Path $stageDir | Select-Object Name, Length | Format-Table | Out-String | Write-Host
-
-          # Build Inno Setup Installer
-          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-          if (Test-Path $iscc) {
-              & $iscc "/DMyAppVersion=$ver" "/DOutputDir=..\..\dist" "/DSourceDir=..\..\dist\staging" "/DOutputBaseFilename=symphytum-$ver-setup" "stuff\installers\symphytum.iss"
-              if ($LASTEXITCODE -ne 0) {
-                  throw "ISCC failed with exit code $LASTEXITCODE"
-              }
-          } else {
-              throw "ISCC.exe not found at $iscc"
-          }
-
-          # Clean up staging directory
-          Remove-Item -Recurse -Force $stageDir
 
       # -------------------------------------------------------------
       # LINUX BUILD
