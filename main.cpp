@@ -13,6 +13,9 @@
 
 #include <QtCore/QTranslator>
 #include <QtCore/QLocale>
+#include <QtWidgets/QStyleFactory>
+#include <QFile>
+#include <QSettings>
 
 
 //-----------------------------------------------------------------------------
@@ -57,6 +60,13 @@ int main(int argc, char *argv[])
         myappTranslator.load("symphytum_" + langCode, ":/languages");
         symphytumApp.installTranslator(&myappTranslator);
     }
+
+    // Determine theme (light/dark) from settings
+    bool dark = settingsManager.restoreProperty("theme", "preferences").toString() == "dark";
+    // Set Fusion style for consistent appearance
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    // Apply theme
+    MainWindow::applyTheme(dark);
 
     //init gui
     MainWindow w;

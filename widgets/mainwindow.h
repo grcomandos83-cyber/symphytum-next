@@ -80,6 +80,11 @@ public:
     /** Get undo stack */
     static QUndoStack* getUndoStack();
 
+    /** Apply application theme (light or dark) */
+    static void applyTheme(bool dark);
+    static QPalette createDarkPalette();
+    static QPalette createLightPalette();
+
 protected:
     void closeEvent(QCloseEvent *event);
 
@@ -116,6 +121,7 @@ private slots:
     void importActionTriggered();
     void lockFormViewActionToggled(const bool locked);
     void safeEditModeActionToggled(const bool locked);
+    void darkThemeActionToggled(bool checked);
 
     /** Create and show alarm list dialog */
     void showAlarmListDialog();
@@ -247,6 +253,7 @@ private:
     QAction *m_importAction;
     QAction *m_lockFormViewAction;
     QAction *m_safeEditModeAction;
+    QAction *m_darkThemeAction;
 #ifdef Q_OS_OSX
     QAction *m_minimizeAction;
     QAction *m_closeWindowAction;

@@ -54,6 +54,8 @@
 #include <QtWidgets/QUndoStack>
 #include <QtGui/QDesktopServices>
 #include <QtCore/QUrl>
+#include <QtWidgets/QStyleFactory>
+#include <QtCore/QFile>
 
 
 //-----------------------------------------------------------------------------
@@ -69,6 +71,49 @@ QUndoStack* MainWindow::m_undoStack = nullptr;
 //-----------------------------------------------------------------------------
 // Public
 //-----------------------------------------------------------------------------
+
+QPalette MainWindow::createDarkPalette()
+{
+    QPalette darkPalette;
+    darkPalette.setColor(QPalette::Window, QColor(45, 45, 45));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Base, QColor(30, 30, 30));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(45, 45, 45));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::Button, QColor(45, 45, 45));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+    return darkPalette;
+}
+
+QPalette MainWindow::createLightPalette()
+{
+    QStyle *fusion = QStyleFactory::create("Fusion");
+    QPalette lightPalette = fusion ? fusion->standardPalette() : qApp->style()->standardPalette();
+    delete fusion;
+    return lightPalette;
+}
+
+void MainWindow::applyTheme(bool dark)
+{
+    qApp->setPalette(dark ? createDarkPalette() : createLightPalette());
+    QFile styleFile(dark ? QStringLiteral(":/qss/dark.qss") : QStringLiteral(":/qss/light.qss"));
+    if (styleFile.open(QFile::ReadOnly)) {
+        qApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
+    } else {
+        qApp->setStyleSheet(QString());
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -1407,6 +1452,16 @@ void MainWindow::safeEditModeActionToggled(const bool locked)
     m_tableView->setSafeEditMode(locked);
 }
 
+void MainWindow::darkThemeActionToggled(bool checked)
+{
+    m_settingsManager->saveProperty("theme", "preferences", checked ? "dark" : "light");
+    applyTheme(checked);
+
+    if (m_formView) {
+        m_formView->reloadAppearanceSettings();
+    }
+}
+
 void MainWindow::showAlarmListDialog()
 {
     if (!m_alarmListDialog) {
@@ -1775,6 +1830,10 @@ void MainWindow::createActions()
     m_safeEditModeAction->setCheckable(true);
     m_safeEditModeAction->setStatusTip(tr("Lock all destructive actions to prevent "
                                           "changes to collections. Only editing of records is allowed."));
+
+    m_darkThemeAction = new QAction(tr("Dark Theme"), this);
+    m_darkThemeAction->setCheckable(true);
+    m_darkThemeAction->setStatusTip(tr("Toggle dark theme mode"));
 }
 
 void MainWindow::createToolBar()
@@ -1878,6 +1937,8 @@ void MainWindow::createMenu()
     m_viewMenu->addAction(m_tableViewModeAction);
     m_viewMenu->addSeparator();
     m_viewMenu->addAction(m_showAlarmDialogAction);
+    m_viewMenu->addSeparator();
+    m_viewMenu->addAction(m_darkThemeAction);
 
     m_cloudMenu = new QMenu(tr("Cloud"), this);
     m_cloudMenu->addAction(m_syncReadOnlyAction);
@@ -2002,6 +2063,8 @@ void MainWindow::createConnections()
             this, &MainWindow::lockFormViewActionToggled);
     connect(m_safeEditModeAction, &QAction::toggled,
             this, &MainWindow::safeEditModeActionToggled);
+    connect(m_darkThemeAction, &QAction::toggled,
+            this, &MainWindow::darkThemeActionToggled);
 
     //record actions
     connect(m_newRecordAction, SIGNAL(triggered()),
@@ -2159,6 +2222,12 @@ void MainWindow::restoreSettings()
         m_lockFormViewAction->setChecked(fwLock);
         m_formView->setLockFormLayout(fwLock);
     }
+
+    //restore dark theme status
+    bool dark = m_settingsManager->restoreProperty("theme", "preferences").toString() == "dark";
+    m_darkThemeAction->blockSignals(true);
+    m_darkThemeAction->setChecked(dark);
+    m_darkThemeAction->blockSignals(false);
 
     //sync
     SyncSession::LOCAL_DATA_CHANGED = m_syncEngine->localDataChanged();

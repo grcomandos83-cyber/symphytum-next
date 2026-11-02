@@ -1,0 +1,137 @@
+/* Symphytum Dark Theme Stylesheet */
+
+QWidget {
+    font-family: "Segoe UI", sans-serif;
+}
+
+QToolTip {
+    color: #ffffff;
+    background-color: #2b2b2b;
+    border: 1px solid #555555;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+QMenuBar {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 8px;
+}
+
+QMenuBar::item:selected {
+    background-color: #3e3e3e;
+}
+
+QMenu {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border: 1px solid #444444;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 4px 24px 4px 20px;
+    border-radius: 2px;
+}
+
+QMenu::item:selected {
+    background-color: #2a82da;
+    color: #ffffff;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: #444444;
+    margin: 4px 8px;
+}
+
+QHeaderView::section {
+    background-color: #353535;
+    color: #e0e0e0;
+    padding: 4px;
+    border: 1px solid #454545;
+}
+
+QTableView {
+    gridline-color: #3d3d3d;
+    background-color: #1e1e1e;
+    alternate-background-color: #262626;
+    color: #ffffff;
+    selection-background-color: #2a82da;
+    selection-color: #ffffff;
+}
+
+QScrollBar:vertical {
+    background: #252525;
+    width: 12px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #4a4a4a;
+    min-height: 20px;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #656565;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background: #252525;
+    height: 12px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #4a4a4a;
+    min-width: 20px;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #656565;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QDateTimeEdit {
+    background-color: #252525;
+    color: #ffffff;
+    border: 1px solid #484848;
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QDateTimeEdit:focus {
+    border: 1px solid #2a82da;
+}
+
+QTabWidget::pane {
+    border: 1px solid #444444;
+}
+
+QTabBar::tab {
+    background: #2d2d2d;
+    color: #bbbbbb;
+    padding: 6px 12px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background: #3e3e3e;
+    color: #ffffff;
+}

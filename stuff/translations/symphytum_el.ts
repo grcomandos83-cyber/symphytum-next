@@ -4291,6 +4291,16 @@ Files archive reduced by %2 MiB</source>
         <translation>Κλείδωμα όλων των ενεργειών αλλαγής δομής για αποτροπή αλλαγών στις συλλογές. Επιτρέπεται μόνο η επεξεργασία εγγραφών.</translation>
     </message>
     <message>
+        <location filename="../../widgets/mainwindow.cpp" line="1824" />
+        <source>Dark Theme</source>
+        <translation>Σκοτεινό Θέμα</translation>
+    </message>
+    <message>
+        <location filename="../../widgets/mainwindow.cpp" line="1826" />
+        <source>Toggle dark theme mode</source>
+        <translation>Εναλλαγή λειτουργίας σκοτεινού θέματος</translation>
+    </message>
+    <message>
         <location filename="../../widgets/mainwindow.cpp" line="1780" />
         <source>Toolbar</source>
         <translation>Γραμμή εργαλείων</translation>

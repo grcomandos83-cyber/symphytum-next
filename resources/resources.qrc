@@ -47,5 +47,7 @@
         <file>images/icons/down.png</file>
         <file>images/icons/up.png</file>
         <file>images/icons/foldersync.png</file>
+        <file>qss/dark.qss</file>
+        <file>qss/light.qss</file>
     </qresource>
 </RCC>
