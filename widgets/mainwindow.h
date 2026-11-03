@@ -271,6 +271,7 @@ private:
     SyncEngine *m_syncEngine;
     UpdateManager *m_updateManager;
     AlarmListDialog *m_alarmListDialog;
+    bool m_manualUpdateCheck;
 
     int m_lastUsedCollectionId;
     QMap<int, int> m_collectionSessionIndexMap; /**< save collection id, row id pairs during session */

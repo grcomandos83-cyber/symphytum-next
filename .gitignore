@@ -13,6 +13,7 @@ debug/
 *.obj
 *.exe
 *.dll
+!stuff/openssl/*.dll
 *.a
 .vscode/
 .idea/

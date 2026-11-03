@@ -120,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent)
       m_addFieldDialog(nullptr),
       m_updateManager(nullptr),
       m_alarmListDialog(nullptr),
+      m_manualUpdateCheck(false),
       m_lastUsedCollectionId(0)
 {
     //init GUI elements
@@ -1630,14 +1631,17 @@ void MainWindow::syncStatusChanged()
 
 void MainWindow::checkForUpdatesSlot()
 {
+    // Check if triggered manually by user clicking the menu action
+    m_manualUpdateCheck = (sender() == m_checkUpdatesAction);
+
     //check if current version has been just updated and inform user if so
     if (m_settingsManager->restoreSoftwareBuild() < DefinitionHolder::SOFTWARE_BUILD) {
         UpgradeSuccessDialog *ud = new UpgradeSuccessDialog(this);
         ud->exec();
     }
 
-    //ask user on auto update checking on 2nd start
-    if ((!m_settingsManager->isFirstTimeStart()) && (!DefinitionHolder::APP_STORE)) {
+    //ask user on auto update checking on 2nd start (only for automatic checks)
+    if (!m_manualUpdateCheck && (!m_settingsManager->isFirstTimeStart()) && (!DefinitionHolder::APP_STORE)) {
         if (!m_settingsManager->restoreUserConfirmedAutoUpdateChecks()) {
             int r = QMessageBox::question(this, tr("Software Updates"),
                                           tr("Should %1 <b>check automatically</b> for software updates?<br />"
@@ -1653,7 +1657,8 @@ void MainWindow::checkForUpdatesSlot()
         }
     }
 
-    if (!(DefinitionHolder::APP_STORE || (!m_settingsManager->restoreCheckUpdates()))) {
+    // Always allow manual checks; only filter automatic checks if disabled
+    if (m_manualUpdateCheck || (!DefinitionHolder::APP_STORE && m_settingsManager->restoreCheckUpdates())) {
         if (!m_updateManager) {
             m_updateManager = new UpdateManager(this);
             connect(m_updateManager, SIGNAL(noUpdateSignal()),
@@ -1673,11 +1678,23 @@ void MainWindow::checkForUpdatesSlot()
 void MainWindow::noUpdateFoundSlot()
 {
     statusBar()->showMessage(tr("Your software version is up to date"));
+    if (m_manualUpdateCheck) {
+        QMessageBox::information(this, tr("Software Updates"),
+                                 tr("You are using the latest version of %1 (v%2).")
+                                 .arg(DefinitionHolder::NAME, DefinitionHolder::VERSION));
+    }
 }
 
 void MainWindow::updateErrorSlot()
 {
     statusBar()->showMessage(tr("Error while checking for software updates"));
+    if (m_manualUpdateCheck) {
+        QMessageBox::warning(this, tr("Software Updates"),
+                             tr("Unable to check for updates.<br>"
+                                "Please verify your internet connection or visit the "
+                                "<a href=\"%1\">GitHub Releases page</a>.")
+                             .arg(DefinitionHolder::DOWNLOAD_URL));
+    }
 }
 
 void MainWindow::reattachModelToViewsSlot()

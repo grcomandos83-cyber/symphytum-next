@@ -13,6 +13,9 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QtCore/QStringList>
+#include <QtCore/QUrlQuery>
+#include <QtCore/QDateTime>
+#include <QtCore/QDebug>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QApplication>
 #include <QtGui/QDesktopServices>
@@ -37,7 +40,18 @@ UpdateManager::~UpdateManager()
 
 void UpdateManager::checkForUpdates()
 {
-    m_accessManager->get(QNetworkRequest(QUrl(DefinitionHolder::UPDATE_URL)));
+    QUrl url(DefinitionHolder::UPDATE_URL);
+    // Add cache-busting query parameter so GitHub CDN doesn't serve a stale cached response
+    QUrlQuery query;
+    query.addQueryItem("t", QString::number(QDateTime::currentMSecsSinceEpoch()));
+    url.setQuery(query);
+
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setHeader(QNetworkRequest::UserAgentHeader, QString("%1/%2").arg(DefinitionHolder::NAME, DefinitionHolder::VERSION));
+
+    m_accessManager->get(request);
 }
 
 
@@ -47,33 +61,42 @@ void UpdateManager::checkForUpdates()
 
 void UpdateManager::updateResponseSlot(QNetworkReply *reply)
 {
-    QString tmp(reply->readAll());
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Update check failed with error:" << reply->errorString();
+        emit updateErrorSignal();
+        reply->deleteLater();
+        return;
+    }
+
+    QString tmp = QString::fromUtf8(reply->readAll()).trimmed();
 
     if (tmp.isEmpty()) {
         emit updateErrorSignal();
+        reply->deleteLater();
         return;
     }
 
     QStringList s = tmp.split(";", Qt::SkipEmptyParts);
 
-    if (s.size() < 1) { //software_build;
+    if (s.isEmpty()) { //software_build;
         emit updateErrorSignal();
+        reply->deleteLater();
         return;
     }
 
-    bool softwareUpdate;
-    bool a;
-    int softwareBuild = s.at(0).toInt(&a);
+    bool a = false;
+    int softwareBuild = s.at(0).trimmed().toInt(&a);
 
     if (!a) {
         emit updateErrorSignal();
+        reply->deleteLater();
         return;
     }
 
-    softwareUpdate = softwareBuild > DefinitionHolder::SOFTWARE_BUILD;
+    bool softwareUpdate = softwareBuild > DefinitionHolder::SOFTWARE_BUILD;
 
     if (softwareUpdate) {
-        int r = QMessageBox::question(0, tr("New Software Version"),
+        int r = QMessageBox::question(nullptr, tr("New Software Version"),
                                       tr("A new version of %1 is available!<br>"
                                          "Do you want to download the new version?")
                                       .arg(DefinitionHolder::NAME),

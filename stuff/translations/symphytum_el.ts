@@ -4016,9 +4016,19 @@ Files archive reduced by %2 MiB</source>
         <translation>Η έκδοση του λογισμικού σας είναι ενημερωμένη</translation>
     </message>
     <message>
+        <location filename="../../widgets/mainwindow.cpp" line="1670" />
+        <source>You are using the latest version of %1 (v%2).</source>
+        <translation>Χρησιμοποιείτε την πιο πρόσφατη έκδοση του %1 (v%2).</translation>
+    </message>
+    <message>
         <location filename="../../widgets/mainwindow.cpp" line="1623" />
         <source>Error while checking for software updates</source>
         <translation>Σφάλμα κατά τον έλεγχο για ενημερώσεις λογισμικού</translation>
+    </message>
+    <message>
+        <location filename="../../widgets/mainwindow.cpp" line="1680" />
+        <source>Unable to check for updates.&lt;br&gt;Please verify your internet connection or visit the &lt;a href="%1"&gt;GitHub Releases page&lt;/a&gt;.</source>
+        <translation>Δεν ήταν δυνατός ο έλεγχος για ενημερώσεις.&lt;br&gt;Ελέγξτε τη σύνδεσή σας στο διαδίκτυο ή επισκεφθείτε τη &lt;a href="%1"&gt;σελίδα εκδόσεων στο GitHub&lt;/a&gt;.</translation>
     </message>
     <message>
         <location filename="../../widgets/mainwindow.cpp" line="1639" />

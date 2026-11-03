@@ -150,7 +150,11 @@ jobs:
                 }
             }
 
-            # Copy OpenSSL DLLs if present on the runner for cloud sync and HTTPS requests
+            # Copy OpenSSL DLLs (first from repository stuff\openssl, then runner fallback)
+            if (Test-Path "stuff\openssl") {
+                Write-Host "Copying repository OpenSSL libraries from stuff\openssl to $stageDir..."
+                Copy-Item "stuff\openssl\*.dll" -Destination $stageDir -Force
+            }
             $sslSearchPaths = @($mingwDir, $qtBin, "C:\Program Files\OpenSSL-Win64\bin", "C:\OpenSSL-Win64\bin")
             foreach ($sp in $sslSearchPaths) {
                 if (Test-Path $sp) {
@@ -191,6 +195,11 @@ jobs:
             }
             if (-not (Test-Path "$stageDir\styles\qwindowsvistastyle.dll")) {
                 Write-Host "Notice: styles\qwindowsvistastyle.dll not found; Fusion fallback will be used."
+            }
+
+            # Verify OpenSSL runtime for HTTPS auto-updates
+            if (-not (Test-Path "$stageDir\libcrypto-1_1-x64.dll") -or -not (Test-Path "$stageDir\libssl-1_1-x64.dll")) {
+                throw "Verification failed: OpenSSL 1.1 libraries are missing in $stageDir!"
             }
 
             Write-Host "All critical libraries and plugins verified successfully in staging directory!"
