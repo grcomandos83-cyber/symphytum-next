@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*.*.*'
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -43,6 +44,11 @@ jobs:
           target: 'desktop'
           arch: 'win64_mingw81'
           tools: 'tools_mingw81'
+
+      - name: Install Inno Setup (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install innosetup -y --no-progress
 
       - name: Build & Package (Windows)
         if: runner.os == 'Windows'
@@ -84,7 +90,11 @@ jobs:
             $env:PATH = "$qtBin;$env:PATH"
 
             # Update translations
-            lrelease Symphytum.pro
+            if (Test-Path "$qtBin\lrelease.exe") {
+                & "$qtBin\lrelease.exe" Symphytum.pro
+            } else {
+                lrelease Symphytum.pro
+            }
             if (Test-Path "stuff\translations\symphytum_el.qm") {
                 Copy-Item "stuff\translations\symphytum_el.qm" "resources\languages\" -Force
             }
@@ -148,12 +158,25 @@ jobs:
             Write-Host "Deployment verification successful! Staging directory contains all critical Qt DLLs."
             Get-ChildItem -Path $stageDir | Select-Object Name, Length | Format-Table | Out-String | Write-Host
 
+            # Create portable zip package before installer cleanup
+            Write-Host "Creating Windows portable ZIP archive..."
+            $portableDir = "$distDir\Symphytum-$ver-Windows-Portable"
+            Copy-Item -Path $stageDir -Destination $portableDir -Recurse -Force
+            Compress-Archive -Path "$portableDir\*" -DestinationPath "$distDir\Symphytum-$ver-Windows-Portable.zip" -Force
+            Remove-Item -Recurse -Force $portableDir
+
             # Build Inno Setup Installer
             $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
             if (-not (Test-Path $iscc)) {
                 $isccItem = Get-ChildItem -Path "C:\Program Files", "C:\Program Files (x86)" -Filter "ISCC.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
                 if ($isccItem) {
                     $iscc = $isccItem.FullName
+                }
+            }
+            if (-not (Test-Path $iscc)) {
+                $isccCmd = Get-Command "ISCC.exe" -ErrorAction SilentlyContinue
+                if ($isccCmd) {
+                    $iscc = $isccCmd.Source
                 }
             }
             if (Test-Path $iscc) {

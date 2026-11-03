@@ -1,5 +1,18 @@
 # Changelog
 
+Version 2.9
+===========
+
+### New Features
+- **Dark Theme UI (🌙 Σκοτεινό Θέμα)**: Added built-in Dark Mode support with dedicated runtime switching. Users can toggle seamlessly between light and dark themes at any time directly from the **View (Προβολή)** menu.
+- **Dynamic Styling & Palette Switching**: Integrated custom QSS stylesheets (`dark.qss` / `light.qss`) and dynamic Qt Fusion palette adjustments, providing a sleek, modern dark environment across menus, dialogs, forms, and table views.
+- **Persistent Preferences**: Theme choice is automatically saved and remembered across application launches via `SettingsManager`.
+- **Full Localization**: Added complete Greek translation entries for the Dark Theme toggle and associated status tips.
+
+### Packaging & CI/CD
+- **Inno Setup & Windows Deployment**: Enhanced automated release packaging workflow (`release.yml`) with automated Inno Setup installation and robust dependency deployment.
+- **Portable Distribution**: Automated bundling of portable Windows zip archives (`Symphytum-2.9-Windows-Portable.zip`) alongside the standard installer.
+
 Version 2.8
 ===========
 

@@ -1,6 +1,6 @@
 #define MyAppName "Symphytum Next"
 #ifndef MyAppVersion
-#define MyAppVersion "2.8"
+#define MyAppVersion "2.9"
 #endif
 #define MyAppPublisher "grcomandos83-cyber"
 #define MyAppURL "https://github.com/grcomandos83-cyber/symphytum-next"

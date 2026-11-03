@@ -66,7 +66,7 @@ For Windows 7, 8, 10, and 11 (64-bit)
 #### 1. Installer (.exe)
 Standard Windows installer with desktop shortcut and uninstaller support:
 
-Download [symphytum-2.8-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/symphytum-2.8-setup.exe)
+Download [symphytum-2.9-setup.exe](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.9/symphytum-2.9-setup.exe)
 
 #### 2. Terminal Installation (PowerShell)
 You can easily download and install the latest version silently via PowerShell with a single command:
@@ -81,7 +81,7 @@ For modern Linux distributions (Ubuntu, Fedora, Debian, etc)
 #### 1. Linux Portable Archive (.tar.gz)
 Self-contained pre-compiled binaries and desktop integration resources:
 
-Download [symphytum-2.8-Linux-x86_64.tar.gz](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/symphytum-2.8-Linux-x86_64.tar.gz)
+Download [symphytum-2.9-Linux-x86_64.tar.gz](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.9/symphytum-2.9-Linux-x86_64.tar.gz)
 
 ### macOS
 For macOS High Sierra (10.13) and later
@@ -89,7 +89,7 @@ For macOS High Sierra (10.13) and later
 #### 1. macOS Disk Image (.dmg)
 Contains the .app bundle, drag and drop into the Applications folder:
 
-Download [symphytum-2.8-macOS.dmg](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.8/symphytum-2.8-macOS.dmg)
+Download [symphytum-2.9-macOS.dmg](https://github.com/grcomandos83-cyber/symphytum-next/releases/download/v2.9/symphytum-2.9-macOS.dmg)
 
 ---
 
