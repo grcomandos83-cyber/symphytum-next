@@ -124,8 +124,8 @@ jobs:
             Copy-Item "$mingwDir\libstdc++-*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
             Copy-Item "$mingwDir\libwinpthread-*.dll" -Destination $stageDir -Force -ErrorAction SilentlyContinue
 
-            # Ensure essential Qt DLLs are in staging folder (fallback copy if windeployqt missed any)
-            $essentialQtDlls = @("Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll", "Qt5PrintSupport.dll", "Qt5Sql.dll", "Qt5Svg.dll", "Qt5WinExtras.dll")
+            # Ensure essential Qt DLLs and graphics runtimes are in staging folder
+            $essentialQtDlls = @("Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll", "Qt5PrintSupport.dll", "Qt5Sql.dll", "Qt5Svg.dll", "Qt5WinExtras.dll", "D3Dcompiler_47.dll", "libEGL.dll", "libGLESv2.dll", "opengl32sw.dll")
             foreach ($dll in $essentialQtDlls) {
                 if (-not (Test-Path "$stageDir\$dll")) {
                     if (Test-Path "$qtBin\$dll") {
@@ -135,27 +135,65 @@ jobs:
                 }
             }
 
-            # Ensure essential Qt plugin folders are in staging folder
+            # Ensure essential Qt plugin folders are populated in staging folder
             $qtPluginsDir = "$qtBin\..\plugins"
             if (Test-Path $qtPluginsDir) {
                 foreach ($pluginDir in @("platforms", "styles", "sqldrivers", "imageformats", "printsupport", "iconengines", "bearer")) {
-                    if (Test-Path "$qtPluginsDir\$pluginDir") {
-                        if (-not (Test-Path "$stageDir\$pluginDir")) {
-                            Write-Host "Copying plugin directory $pluginDir to $stageDir"
-                            Copy-Item "$qtPluginsDir\$pluginDir" -Destination "$stageDir\$pluginDir" -Recurse -Force
+                    $src = "$qtPluginsDir\$pluginDir"
+                    $dst = "$stageDir\$pluginDir"
+                    if (Test-Path $src) {
+                        if (-not (Test-Path $dst)) {
+                            New-Item -ItemType Directory -Path $dst -Force | Out-Null
+                        }
+                        Copy-Item "$src\*" -Destination $dst -Recurse -Force
+                    }
+                }
+            }
+
+            # Copy OpenSSL DLLs if present on the runner for cloud sync and HTTPS requests
+            $sslSearchPaths = @($mingwDir, $qtBin, "C:\Program Files\OpenSSL-Win64\bin", "C:\OpenSSL-Win64\bin")
+            foreach ($sp in $sslSearchPaths) {
+                if (Test-Path $sp) {
+                    Get-ChildItem -Path $sp -Filter "*.dll" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "^(lib)?(crypto|ssl)" } | ForEach-Object {
+                        if (-not (Test-Path "$stageDir\$($_.Name)")) {
+                            Write-Host "Copying SSL dependency: $($_.Name)"
+                            Copy-Item $_.FullName -Destination $stageDir -Force
                         }
                     }
                 }
             }
 
-            # Verify critical Qt DLLs exist in staging
-            $criticalDlls = @("Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll", "Qt5PrintSupport.dll")
+            # Verify critical dependencies exist in staging folder
+            $criticalDlls = @(
+                "Qt5Core.dll", "Qt5Widgets.dll", "Qt5Gui.dll", "Qt5Network.dll",
+                "Qt5PrintSupport.dll", "Qt5Sql.dll", "Qt5Svg.dll", "Qt5WinExtras.dll"
+            )
             foreach ($dll in $criticalDlls) {
                 if (-not (Test-Path "$stageDir\$dll")) {
                     throw "Verification failed: $dll is missing in $stageDir!"
                 }
             }
-            Write-Host "Deployment verification successful! Staging directory contains all critical Qt DLLs."
+
+            # Verify MinGW runtime
+            if (-not (Get-ChildItem -Path $stageDir -Filter "libstdc++*.dll" -ErrorAction SilentlyContinue)) {
+                throw "Verification failed: libstdc++ is missing in $stageDir!"
+            }
+            if (-not (Get-ChildItem -Path $stageDir -Filter "libwinpthread*.dll" -ErrorAction SilentlyContinue)) {
+                throw "Verification failed: libwinpthread is missing in $stageDir!"
+            }
+
+            # Verify critical Qt plugins
+            if (-not (Test-Path "$stageDir\platforms\qwindows.dll")) {
+                throw "Verification failed: platforms\qwindows.dll is missing in $stageDir!"
+            }
+            if (-not (Test-Path "$stageDir\sqldrivers\qsqlite.dll")) {
+                throw "Verification failed: sqldrivers\qsqlite.dll is missing in $stageDir!"
+            }
+            if (-not (Test-Path "$stageDir\styles\qwindowsvistastyle.dll")) {
+                Write-Host "Notice: styles\qwindowsvistastyle.dll not found; Fusion fallback will be used."
+            }
+
+            Write-Host "All critical libraries and plugins verified successfully in staging directory!"
             Get-ChildItem -Path $stageDir | Select-Object Name, Length | Format-Table | Out-String | Write-Host
 
             # Create portable zip package before installer cleanup
